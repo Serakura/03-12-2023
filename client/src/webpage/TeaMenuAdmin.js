@@ -69,6 +69,8 @@ const TeaMenuAdmin = () => {
     img1: "",
     img2: "",
     img3: "",
+    img4: "",
+    img5: "",
     highlight: "",
     tsp: "",
     tspg: "",
@@ -109,6 +111,8 @@ const TeaMenuAdmin = () => {
       formData.append("img1", files[0]);
       formData.append("img2", files[1]);
       formData.append("img3", files[2]);
+      formData.append("img4", files[3]);
+      formData.append("img5", files[4]);
 
       await Axios.post("http://localhost:5000/bevs", formData, {
         headers: {

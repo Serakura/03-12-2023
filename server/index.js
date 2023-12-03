@@ -372,16 +372,18 @@ app.delete('/foods/:id', async (req, res) => {
 app.get('/bevs', async (req, res) => {
   try {
     const response = await Bevs.findAll({
-      attributes: ['id', 'uuid', 'name', 'price', 'ings', 'img1', 'img2', 'img3', 'highlight', 'tsp', 'tspg', 'water', 'temp', 'time', 'desc', 'type', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'uuid', 'name', 'price', 'ings', 'img1', 'img2', 'img3', 'img4', 'img5', 'highlight', 'tsp', 'tspg', 'water', 'temp', 'time', 'desc', 'type', 'createdAt', 'updatedAt'],
       include: [{
         model: User,
         attributes: ['name', 'email']
       }]
     });
     response.forEach(bev => {
-      bev.img1 = 'http://localhost:5000/' + bev.img1;
-      bev.img2 = 'http://localhost:5000/' + bev.img2;
-      bev.img3 = 'http://localhost:5000/' + bev.img3;
+      bev.img1 = bev.img1 ? 'http://localhost:5000/' + bev.img1 : null;
+      bev.img2 = bev.img2 ? 'http://localhost:5000/' + bev.img2 : null;
+      bev.img3 = bev.img3 ? 'http://localhost:5000/' + bev.img3 : null;
+      bev.img4 = bev.img4 ? 'http://localhost:5000/' + bev.img4 : null;
+      bev.img5 = bev.img5 ? 'http://localhost:5000/' + bev.img5 : null;
     })
     res.status(200).json(response);
   } catch (error) {
@@ -547,35 +549,45 @@ const uploadBev = multer({ storage: BevStorage });
 app.post('/bevs', uploadBev.fields([
   { name: 'img1', maxCount: 1 },
   { name: 'img2', maxCount: 1 },
-  { name: 'img3', maxCount: 1 }
+  { name: 'img3', maxCount: 1 },
+  { name: 'img4', maxCount: 1 },
+  { name: 'img5', maxCount: 1 },
 ]), async (req, res) => {
   const { name, price, ings, highlight, tsp, tspg, water, temp, time, desc, type, userId } = req.body;
   const images = req.files;
 
+  let img = [];
+
   try {
-    if (!images.img1 || !images.img2 || !images.img3) {
-      throw new Error('Please upload 3 images');
+    if (images.length === 0 || images.length > 5) {
+      throw new Error('Please upload 1-5 images');
     }
 
-    const img1 = images.img1[0].filename;
-    const img2 = images.img2[0].filename;
-    const img3 = images.img3[0].filename;
+    // Loop through images and push to img array
+    for (let i = 1; i <= 5; i++) {
+      if (images[`img${i}`]) {
+        img.push(images[`img${i}`][0].filename);
+      }
+    }
+
     await Bevs.create({
-      name: name,
-      price: price,
-      ings: ings,
-      img1: img1,
-      img2: img2,
-      img3: img3,
-      highlight: highlight,
-      tsp: tsp,
-      tspg: tspg,
-      water: water,
-      temp: temp,
-      time: time,
-      desc: desc,
-      type: type,
-      userId: userId,
+      name,
+      price,
+      ings,
+      img1: img[0] ?? null,
+      img2: img[1] ?? null,
+      img3: img[2] ?? null,
+      img4: img[3] ?? null,
+      img5: img[4] ?? null,
+      highlight,
+      tsp,
+      tspg,
+      water,
+      temp,
+      time,
+      desc,
+      type,
+      userId,
     });
 
     res.status(201).json({ msg: "Beverage Created Successfully" });
